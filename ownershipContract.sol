@@ -37,9 +37,12 @@ contract ownershipContract {
     function authenticateDevice(uint _identifier) public view returns (uint _challenge, uint _response) {
         _challenge = idInfo[_identifier].challenge;
         _response = idInfo[_identifier].response;
+    }
     
     function transferOwnership(uint _identifier, address buyer) public {
-        require(
+        //If the first argument of `require` evaluates to `false`, execution terminates and all changes to the state 
+		//and to Ether balances are reverted.
+		require(
             msg.sender == idInfo[_identifier].owner,
             "Only device owner can transfer the ownership."
         );
