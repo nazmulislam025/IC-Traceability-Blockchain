@@ -42,6 +42,8 @@ contract ownershipContract {
     function transferOwnership(uint _identifier, address buyer) public {
         //If the first argument of `require` evaluates to `false`, execution terminates and all changes to the state 
 		//and to Ether balances are reverted.
+		//Use assert(x) if you never ever want x to be false, not in any circumstance (apart from a bug in your code). 
+		//Use require(x) if x can be false, due to e.g. invalid input or a failing external component.
 		require(
             msg.sender == idInfo[_identifier].owner,
             "Only device owner can transfer the ownership."
