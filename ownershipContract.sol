@@ -1,16 +1,18 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.5.11;
 
 contract ownershipContract {
     
-    //The keyword "public" makes those variables readable from outside.
+    //The keyword "public" makes those variables readable from outside and inside.
     //The address type is a 160-bit value that doesn't allow any arithmetic operations
     address public consortium;
     
-    //This declares a new complex type which will be used for variables later. It will represent a single voter.
+    //This declares a new complex type which will be used for variables later. It will represent a single device.
     struct info {
         address owner;
+        address[] ownershipHistory;
         uint challenge;
         uint response;
+        uint pubKey;
     }
     
     //The type maps addresses to unsigned integers. Mappings can be seen as hash tables which are virtually initialized such that
@@ -24,19 +26,23 @@ contract ownershipContract {
     
     uint deviceIdentifier;
 
-    function registerDevice(uint _identifier, address _owner, uint _challenge, uint _response) public {
-        idInfo[_identifier].owner = _owner;
+    function registerDevice(uint _identifier, uint _challenge, uint _response, uint _pubKey) public {
+        idInfo[_identifier].owner = msg.sender;
+        idInfo[_identifier].ownershipHistory.push(msg.sender);
         idInfo[_identifier].challenge = _challenge;
         idInfo[_identifier].response = _response;
+        idInfo[_identifier].pubKey = _pubKey;
     }
     
-    function checkOwnership(uint _identifier) public view returns (address _ownerName) {
+    function checkOwnership(uint _identifier) public view returns (address _ownerName, address [] memory _ownershipHistory) {
         _ownerName = idInfo[_identifier].owner;
+        _ownershipHistory = idInfo[_identifier].ownershipHistory;
     }
     
-    function authenticateDevice(uint _identifier) public view returns (uint _challenge, uint _response) {
+    function authenticateDevice(uint _identifier) public view returns (uint _challenge, uint _response, uint _pubKey) {
         _challenge = idInfo[_identifier].challenge;
         _response = idInfo[_identifier].response;
+        _pubKey = idInfo[_identifier].pubKey;
     }
     
     function transferOwnership(uint _identifier, address buyer) public {
@@ -49,5 +55,11 @@ contract ownershipContract {
             "Only device owner can transfer the ownership."
         );
         idInfo[_identifier].owner = buyer;
+        idInfo[_identifier].ownershipHistory.push(buyer);
+    }
+    
+    function results(uint _identifier) public view returns(address, uint, uint, uint)
+    {
+        return(idInfo[_identifier].owner, idInfo[_identifier].challenge, idInfo[_identifier].response, idInfo[_identifier].pubKey);
     }
 }
